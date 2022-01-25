@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -15,10 +17,16 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.ArcadeDriveCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,18 +39,39 @@ import edu.wpi.first.wpilibj2.command.RamseteCommand;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  // Create the field //
+  Field2d m_field = new Field2d();
+  
   // The robot's subsystems and commands are defined here...
-  private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
+  private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem(m_field);
 
   // Joysticks
   private final Joystick m_driverController = new Joystick(Constants.DRIVER);
   private final Joystick m_operatorController = new Joystick(Constants.OPERATOR);
 
+
+  String trajectoryJSON = "Unnamed.wpilib.json";
+  String simpleTrajectoryJSON = "Simple.wpilib.json";
+  Trajectory trajectory = new Trajectory();
+  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     
     // Set default command to arcade drive when in teleop
     m_drivetrainSubsystem.setDefaultCommand(getArcadeDriveCommand());
+
+    try {
+      Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(simpleTrajectoryJSON);
+      trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+
+      // Push the trajectory to Field2d.
+      m_field.getObject("traj").setTrajectory(trajectory);
+    } catch (IOException ex) {
+      DriverStation.reportError("Unable to open trajectory: " + simpleTrajectoryJSON, ex.getStackTrace());
+    }
+
+    // Input the field onto the SmartDashboard //
+    SmartDashboard.putData("Field", m_field);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -104,8 +133,20 @@ public class RobotContainer {
         // Pass config
         config);
 
+    m_field.getObject("traj").setTrajectory(exampleTrajectory);
+
+    var table = NetworkTableInstance.getDefault().getTable("troubleshooting");
+    var leftReference = table.getEntry("left_reference");
+    var leftMeasurement = table.getEntry("left_measurement");
+    var rightReference = table.getEntry("right_reference");
+    var rightMeasurement = table.getEntry("right_measurement");
+
+    var leftController = new PIDController(Constants.kPDriveVel, 0, 0);
+    var rightController = new PIDController(Constants.kPDriveVel, 0, 0);
+
     RamseteCommand ramseteCommand = new RamseteCommand(
         exampleTrajectory,
+        // trajectory,
         m_drivetrainSubsystem::getPose,
         new RamseteController(Constants.kRamseteB, Constants.kRamseteZeta),
         new SimpleMotorFeedforward(
@@ -114,10 +155,18 @@ public class RobotContainer {
             Constants.kaVoltSecondsSquaredPerMeter),
         Constants.kDriveKinematics,
         m_drivetrainSubsystem::getWheelSpeeds,
-        new PIDController(Constants.kPDriveVel, 0, 0),
-        new PIDController(Constants.kPDriveVel, 0, 0),
+        leftController,
+        rightController,
         // RamseteCommand passes volts to the callback
-        m_drivetrainSubsystem::tankDriveVolts,
+        (leftVolts, rightVolts) -> {
+          m_drivetrainSubsystem.tankDriveVolts(leftVolts, rightVolts);
+
+          leftMeasurement.setNumber(m_drivetrainSubsystem.getWheelSpeeds().leftMetersPerSecond);
+          leftReference.setNumber(leftController.getSetpoint());
+
+          rightMeasurement.setNumber(m_drivetrainSubsystem.getWheelSpeeds().rightMetersPerSecond);
+          rightReference.setNumber(rightController.getSetpoint());
+        },
         m_drivetrainSubsystem);
 
     // Reset odometry to the starting pose of the trajectory.

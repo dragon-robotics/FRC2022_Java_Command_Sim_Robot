@@ -40,7 +40,7 @@ public final class Constants {
     public static final int BTN_STICK_RIGHT = 10;
 
     // Robot Measurement Constants //
-    public static final double TRACK_WIDTH_METERS = 0.555;
+    public static final double TRACK_WIDTH_METERS = 0.546;
     public static final double WHEEL_DIAMETER_METERS = 0.1524;
     public static final double GEAR_RATIO = 10.71;
     public static final double WHEEL_RADIUS_METERS = WHEEL_DIAMETER_METERS / 2;
@@ -63,13 +63,12 @@ public final class Constants {
     public static final double kPDriveVel = 1.9925;
 
     // DifferentialDriveKinematics //
-    public static final double kTrackwidthMeters = 0.555;
     public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(
-            kTrackwidthMeters);
+                    TRACK_WIDTH_METERS);
 
     // Max Trajectory Velocity/Acceleration //
-    public static final double kMaxSpeedMetersPerSecond = 0.8;
-    public static final double kMaxAccelerationMetersPerSecondSquared = 0.8;
+    public static final double kMaxSpeedMetersPerSecond = 3;
+    public static final double kMaxAccelerationMetersPerSecondSquared = 3;
 
     // Ramsete Parameters //
     public static final double kRamseteB = 2;

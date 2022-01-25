@@ -18,9 +18,11 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
@@ -54,7 +56,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
       2.1,                            // MOI of 2.1 kg m^2 (from CAD model).
       26.5,                           // Mass of the robot is 26.5 kg.
       Constants.WHEEL_RADIUS_METERS,  // Robot uses 3" radius (6" diameter) wheels.
-      0.546,                          // Distance between wheels is 0.546 meters.
+      Constants.TRACK_WIDTH_METERS,   // Distance between wheels is 0.546 meters.
       /*
        * The standard deviations for measurement noise:
        * x and y: 0.001 m
@@ -66,14 +68,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
            // line to add measurement noise.
   );
 
-  // Create the field //
-  Field2d m_field = new Field2d();
-
   // Create the odometry object //
   DifferentialDriveOdometry m_odometry;
 
+  Field2d m_field;
+
   /** Creates a new DrivetrainSubsystem. */
-  public DrivetrainSubsystem() {
+  public DrivetrainSubsystem(Field2d field) {
 
     // Factory default configurations for all motors //
     m_talonLeftLead.configFactoryDefault();
@@ -103,7 +104,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     // Set our lead motor's rotation orientations //
     m_talonLeftLead.setInverted(TalonFXInvertType.CounterClockwise);
-    m_talonLeftLead.setInverted(TalonFXInvertType.Clockwise);
+    m_talonRightLead.setInverted(TalonFXInvertType.Clockwise);
 
     // Configure encoder readings on the TalonFX //
     m_talonLeftLead.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
@@ -116,15 +117,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
     zeroHeading();
 
     // Set odometry //
-    m_odometry = new DifferentialDriveOdometry(m_gyro.getRotation2d());
+    // m_odometry = new DifferentialDriveOdometry(m_gyro.getRotation2d());
+    m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
 
-    // Input the field onto the SmartDashboard //
-    SmartDashboard.putData("Field", m_field);
+    m_field = field;
   }
 
   // Drive Modes //
   public void arcadeDrive(double speed, double rotation) {
-    m_drive.arcadeDrive(speed, -rotation);
+    m_drive.arcadeDrive(speed, rotation);
   }
 
   public void tankDrive(double leftSpeed, double rightSpeed) {
@@ -148,8 +149,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     double leftSpeed = m_talonLeftLead.getSelectedSensorVelocity() * Constants.ENCODER_DISTANCE_PER_PULSE * 10;
     double rightSpeed = m_talonRightLead.getSelectedSensorVelocity() * Constants.ENCODER_DISTANCE_PER_PULSE * 10;  // Need to invert the results
-    // System.out.println("Left Wheel Speed: " + leftSpeed);
-    // System.out.println("Right Wheel Speed: " + rightSpeed);
     return new DifferentialDriveWheelSpeeds(leftSpeed, rightSpeed);
   }
 
@@ -227,6 +226,28 @@ public class DrivetrainSubsystem extends SubsystemBase {
     
     // Set field pose //
     m_field.setRobotPose(getPose());
+
+    // Troubleshoot X and Y
+    var translation = m_odometry.getPoseMeters().getTranslation();
+    NetworkTableInstance.getDefault().getTable("troubleshooting").getEntry("X")
+      .setNumber(translation.getX());
+    NetworkTableInstance.getDefault().getTable("troubleshooting").getEntry("Y")
+      .setNumber(translation.getY());
+
+    // Troubleshoot angle
+    NetworkTableInstance.getDefault().getTable("troubleshooting").getEntry("Heading")
+      .setNumber(m_gyro.getRotation2d().getDegrees());
+
+    // Troubleshoot encoder values
+    NetworkTableInstance.getDefault().getTable("troubleshooting").getEntry("Left Wheel")
+      .setNumber(nativeUnitsToDistanceMeters(m_talonLeftLead.getSelectedSensorPosition()));
+    NetworkTableInstance.getDefault().getTable("troubleshooting").getEntry("Right Wheel")
+      .setNumber(nativeUnitsToDistanceMeters(m_talonRightLead.getSelectedSensorPosition()));
+
+    NetworkTableInstance.getDefault().getTable("troubleshooting").getEntry("Left Wheel Speed")
+        .setNumber(m_talonLeftLead.getSelectedSensorVelocity() * Constants.ENCODER_DISTANCE_PER_PULSE * 10);
+    NetworkTableInstance.getDefault().getTable("troubleshooting").getEntry("Right Wheel Speed")
+        .setNumber(m_talonRightLead.getSelectedSensorVelocity() * Constants.ENCODER_DISTANCE_PER_PULSE * 10);      
   }
 
   @Override
