@@ -54,10 +54,17 @@
     },
     "windows": {
       "/SmartDashboard/Field": {
+        "Robot": {
+          "length": 0.8064500093460083
+        },
+        "height": 8.229599952697754,
+        "image": "C:\\Users\\Doug\\Desktop\\FRC\\FRC Software\\FRC 2022 Software\\Projects\\FRC2022_Java_Command_Sim_Robot\\PathWeaver\\Field\\2022-field.png",
         "traj": {
           "arrows": false,
           "style": "Line"
         },
+        "units": "meters",
+        "width": 16.459199905395508,
         "window": {
           "visible": true
         }

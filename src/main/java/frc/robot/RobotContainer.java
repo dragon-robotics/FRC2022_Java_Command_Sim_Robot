@@ -49,25 +49,33 @@ public class RobotContainer {
   private final Joystick m_driverController = new Joystick(Constants.DRIVER);
   private final Joystick m_operatorController = new Joystick(Constants.OPERATOR);
 
-
-  String trajectoryJSON = "Unnamed.wpilib.json";
-  String simpleTrajectoryJSON = "Simple.wpilib.json";
+  // Store our overall trajectory //
   Trajectory trajectory = new Trajectory();
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    
+
+    String threeBallAutoTraj1Json = "Part1.wpilib.json";
+    String threeBallAutoTraj2Json = "Part2.wpilib.json";
+    String threeBallAutoTraj3Json = "Part3.wpilib.json";
+
     // Set default command to arcade drive when in teleop
     m_drivetrainSubsystem.setDefaultCommand(getArcadeDriveCommand());
 
     try {
-      Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(simpleTrajectoryJSON);
-      trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+      Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(threeBallAutoTraj1Json);
+      Trajectory traj1 = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+      trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(threeBallAutoTraj2Json);
+      Trajectory traj2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+      trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(threeBallAutoTraj3Json);
+      Trajectory traj3 = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+      Trajectory tempTrajectory = traj1.concatenate(traj2);
+      trajectory = tempTrajectory.concatenate(traj3);
 
       // Push the trajectory to Field2d.
       m_field.getObject("traj").setTrajectory(trajectory);
     } catch (IOException ex) {
-      DriverStation.reportError("Unable to open trajectory: " + simpleTrajectoryJSON, ex.getStackTrace());
+      DriverStation.reportError("Unable to open trajectory: " + threeBallAutoTraj1Json, ex.getStackTrace());
     }
 
     // Input the field onto the SmartDashboard //
@@ -123,17 +131,15 @@ public class RobotContainer {
             .addConstraint(autoVoltageConstraint);
 
     // An example trajectory to follow. All units in meters.
-    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
-        // Start at the origin facing the +X direction
-        new Pose2d(0, 0, new Rotation2d(0)),
-        // Pass through these two interior waypoints, making an 's' curve path
-        List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-        // End 3 meters straight ahead of where we started, facing forward
-        new Pose2d(3, 0, new Rotation2d(0)),
-        // Pass config
-        config);
-
-    m_field.getObject("traj").setTrajectory(exampleTrajectory);
+    // Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
+    //     // Start at the origin facing the +X direction
+    //     new Pose2d(0, 0, new Rotation2d(0)),
+    //     // Pass through these two interior waypoints, making an 's' curve path
+    //     List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+    //     // End 3 meters straight ahead of where we started, facing forward
+    //     new Pose2d(3, 0, new Rotation2d(0)),
+    //     // Pass config
+    //     config);
 
     var table = NetworkTableInstance.getDefault().getTable("troubleshooting");
     var leftReference = table.getEntry("left_reference");
@@ -145,8 +151,8 @@ public class RobotContainer {
     var rightController = new PIDController(Constants.kPDriveVel, 0, 0);
 
     RamseteCommand ramseteCommand = new RamseteCommand(
-        exampleTrajectory,
-        // trajectory,
+        // exampleTrajectory,
+        trajectory,
         m_drivetrainSubsystem::getPose,
         new RamseteController(Constants.kRamseteB, Constants.kRamseteZeta),
         new SimpleMotorFeedforward(
@@ -170,7 +176,7 @@ public class RobotContainer {
         m_drivetrainSubsystem);
 
     // Reset odometry to the starting pose of the trajectory.
-    m_drivetrainSubsystem.resetOdometry(exampleTrajectory.getInitialPose());
+    m_drivetrainSubsystem.resetOdometry(trajectory.getInitialPose());
 
     // Run path following command, then stop at the end.
     return ramseteCommand.andThen(() -> m_drivetrainSubsystem.tankDriveVolts(0, 0));

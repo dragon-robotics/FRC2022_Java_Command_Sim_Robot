@@ -18,17 +18,14 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -117,8 +114,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     zeroHeading();
 
     // Set odometry //
-    // m_odometry = new DifferentialDriveOdometry(m_gyro.getRotation2d());
-    m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
+    m_odometry = new DifferentialDriveOdometry(m_gyro.getRotation2d());
 
     m_field = field;
   }
@@ -214,7 +210,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     double wheelRotations = motorRotations / Constants.GEAR_RATIO;
     double positionMeters = wheelRotations * (2 * Math.PI * Constants.WHEEL_RADIUS_METERS);
     return positionMeters;
-  }  
+  }
 
   @Override
   public void periodic() {
