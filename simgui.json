@@ -81,10 +81,13 @@
       },
       "open": true
     },
-    "connections": true,
-    "troubleshooting": {
+    "SmartDashboard": {
+      "Field": {
+        "open": true
+      },
       "open": true
-    }
+    },
+    "connections": true
   },
   "Plot": {
     "Plot <0>": {
