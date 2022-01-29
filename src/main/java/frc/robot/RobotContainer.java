@@ -27,7 +27,9 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.commands.ArcadeDriveCommand;
+import frc.robot.AutoLoader.AutoCommand;
+import frc.robot.commands.Auto.FourBallHighGoalCommand;
+import frc.robot.commands.Teleop.ArcadeDriveCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
@@ -48,6 +50,11 @@ public class RobotContainer {
   // Joysticks
   private final Joystick m_driverController = new Joystick(Constants.DRIVER);
   private final Joystick m_operatorController = new Joystick(Constants.OPERATOR);
+
+  // Create the auto loader class to load everything for us //
+
+  // Create SmartDashboard chooser for autonomous routines
+  private final AutoLoader m_autoLoader = new AutoLoader();
 
   // Store our overall trajectory //
   Trajectory trajectory = new Trajectory();
@@ -100,7 +107,19 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return getRamseteCommand();
+    AutoCommand command = m_autoLoader.getSelected();
+    
+    switch(command){
+      NONE:
+        return null;
+        break;
+      EXAMPLE_TRAJECTORY:
+        return getRamseteCommand();
+        break;
+      FOUR_BALL_HIGH_GOAL:
+        return new FourBallHighGoalCommand(m_drivetrainSubsystem);
+        break;
+    }
   }
 
   public Command getArcadeDriveCommand() {
@@ -112,40 +131,9 @@ public class RobotContainer {
   }
 
   public Command getRamseteCommand() {
-    // Create a voltage constraint to ensure we don't accelerate too fast
-    var autoVoltageConstraint = new DifferentialDriveVoltageConstraint(
-        new SimpleMotorFeedforward(
-            Constants.ksVolts,
-            Constants.kvVoltSecondsPerMeter,
-            Constants.kaVoltSecondsSquaredPerMeter),
-        Constants.kDriveKinematics,
-        10);
-
-    // Create config for trajectory
-    TrajectoryConfig config = new TrajectoryConfig(
-        Constants.kMaxSpeedMetersPerSecond,
-        Constants.kMaxAccelerationMetersPerSecondSquared)
-            // Add kinematics to ensure max speed is actually obeyed
-            .setKinematics(Constants.kDriveKinematics)
-            // Apply the voltage constraint
-            .addConstraint(autoVoltageConstraint);
 
     // An example trajectory to follow. All units in meters.
-    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
-        // Start at the origin facing the +X direction
-        new Pose2d(0, 0, new Rotation2d(0)),
-        // Pass through these two interior waypoints, making an 's' curve path
-        List.of(
-          new Translation2d(1, 2),
-          new Translation2d(3, 1),
-          new Translation2d(2, 0),
-          new Translation2d(3, -1),
-          new Translation2d(1, -2)
-        ),
-        // End 3 meters straight ahead of where we started, facing forward
-        new Pose2d(0, 0, new Rotation2d(Math.toRadians(-180))),
-        // Pass config
-        config);
+    Trajectory exampleTrajectory = GenerateTrajectory.getTrajectory(AutoCommand.EXAMPLE_TRAJECTORY);
 
     var table = NetworkTableInstance.getDefault().getTable("troubleshooting");
     var leftReference = table.getEntry("left_reference");
