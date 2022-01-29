@@ -62,28 +62,8 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
-    String threeBallAutoTraj1Json = "Part1.wpilib.json";
-    String threeBallAutoTraj2Json = "Part2.wpilib.json";
-    String threeBallAutoTraj3Json = "Part3.wpilib.json";
-
     // Set default command to arcade drive when in teleop
     m_drivetrainSubsystem.setDefaultCommand(getArcadeDriveCommand());
-
-    try {
-      Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(threeBallAutoTraj1Json);
-      Trajectory traj1 = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-      trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(threeBallAutoTraj2Json);
-      Trajectory traj2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-      trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(threeBallAutoTraj3Json);
-      Trajectory traj3 = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-      Trajectory tempTrajectory = traj1.concatenate(traj2);
-      trajectory = tempTrajectory.concatenate(traj3);
-
-      // Push the trajectory to Field2d.
-      m_field.getObject("traj").setTrajectory(trajectory);
-    } catch (IOException ex) {
-      DriverStation.reportError("Unable to open trajectory: " + threeBallAutoTraj1Json, ex.getStackTrace());
-    }
 
     // Input the field onto the SmartDashboard //
     SmartDashboard.putData("Field", m_field);
