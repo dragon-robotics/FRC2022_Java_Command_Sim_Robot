@@ -4,24 +4,11 @@
 
 package frc.robot;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.trajectory.TrajectoryUtil;
-import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -42,7 +29,7 @@ import edu.wpi.first.wpilibj2.command.RamseteCommand;
  */
 public class RobotContainer {
   // Create the field //
-  Field2d m_field = new Field2d();
+  public final static Field2d m_field = new Field2d();
   
   // The robot's subsystems and commands are defined here...
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem(m_field);
@@ -90,15 +77,14 @@ public class RobotContainer {
     AutoCommand command = m_autoLoader.getSelected();
     
     switch(command){
-      NONE:
+      case NONE:
         return null;
-        break;
-      EXAMPLE_TRAJECTORY:
+      case EXAMPLE_TRAJECTORY:
         return getRamseteCommand();
-        break;
-      FOUR_BALL_HIGH_GOAL:
+      case FOUR_BALL_HIGH_GOAL:
         return new FourBallHighGoalCommand(m_drivetrainSubsystem);
-        break;
+      default:
+        return null;
     }
   }
 

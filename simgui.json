@@ -39,6 +39,8 @@
       "/LiveWindow/DrivetrainSubsystem": "Subsystem",
       "/LiveWindow/Ungrouped/DifferentialDrive[1]": "DifferentialDrive",
       "/LiveWindow/Ungrouped/PIDController[10]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[11]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[12]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
@@ -50,7 +52,8 @@
       "/LiveWindow/Ungrouped/PIDController[9]": "PIDController",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
       "/LiveWindow/Ungrouped/navX-Sensor[4]": "Gyro",
-      "/SmartDashboard/Field": "Field2d"
+      "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/SendableChooser[0]": "String Chooser"
     },
     "windows": {
       "/SmartDashboard/Field": {
@@ -65,6 +68,11 @@
         },
         "units": "meters",
         "width": 16.459199905395508,
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/SendableChooser[0]": {
         "window": {
           "visible": true
         }

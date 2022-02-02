@@ -57,8 +57,6 @@ public class GenerateTrajectory {
                         new Pose2d(0, 0, new Rotation2d(Math.toRadians(-180))),
                         // Pass config
                     config);
-            case FOUR_BALL_HIGH_GOAL:
-                
             default:
                 return null;
         }

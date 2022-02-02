@@ -11,12 +11,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryUtil;
-import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -29,10 +26,12 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 public class FourBallHighGoalCommand extends ParallelCommandGroup {
   /** Creates a new FourBallHighGoalCommand. */
   
+  private Trajectory p1, p2;  // Part 1 and 2 of the trajectory
+
   // This command will require:
   //  - Drivetrain subsystem
   //  - Shooter subsystem
-  //  - 
+  //  - Intake subsystem
   public FourBallHighGoalCommand(DrivetrainSubsystem drivetrain) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
@@ -44,7 +43,6 @@ public class FourBallHighGoalCommand extends ParallelCommandGroup {
     }
 
     // Add trajectory pt 1
-    Trajectory p1 = new Trajectory();
     for(int i = 0; i < 2; i++){
       try {        
         Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(fourBallHighGoalAutoJsons[i]);
@@ -62,13 +60,12 @@ public class FourBallHighGoalCommand extends ParallelCommandGroup {
     }
 
     // Add trajectory pt 2
-    Trajectory p2 = new Trajectory();
     for (int i = 2; i < 4; i++) {
       try {
         Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(fourBallHighGoalAutoJsons[i]);
         Trajectory tmpTraj = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
 
-        if (i == 0) {
+        if (i == 2) {
           p2 = tmpTraj;
         } else {
           p2 = p2.concatenate(tmpTraj);
