@@ -13,7 +13,7 @@ public class AutoLoader {
     /**
      * Enumeration for the possible autos that we'll create
      */
-    enum AutoCommand {
+    public enum AutoCommand {
         NONE,                           // Does Nothing
         EXAMPLE_TRAJECTORY,             // Executes the Example Trajectory for Testing
         LEAVE_TARMAC,                   // Just leaves the tarmac without scoring

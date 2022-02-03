@@ -55,6 +55,9 @@ public class RobotContainer {
     // Input the field onto the SmartDashboard //
     SmartDashboard.putData("Field", m_field);
 
+    // Load all wpilib.json trajectory files into the Roborio to speed up auto deployment //
+    GenerateTrajectory.loadTrajectories();
+
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -75,14 +78,15 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
     AutoCommand command = m_autoLoader.getSelected();
-    
+
     switch(command){
       case NONE:
         return null;
       case EXAMPLE_TRAJECTORY:
         return getRamseteCommand();
       case FOUR_BALL_HIGH_GOAL:
-        return new FourBallHighGoalCommand(m_drivetrainSubsystem);
+        return new FourBallHighGoalCommand(
+          m_drivetrainSubsystem, command);
       default:
         return null;
     }
@@ -99,7 +103,7 @@ public class RobotContainer {
   public Command getRamseteCommand() {
 
     // An example trajectory to follow. All units in meters.
-    Trajectory exampleTrajectory = GenerateTrajectory.getTrajectory(AutoCommand.EXAMPLE_TRAJECTORY);
+    Trajectory exampleTrajectory = GenerateTrajectory.getTrajectory(AutoCommand.EXAMPLE_TRAJECTORY).get(0);
 
     var table = NetworkTableInstance.getDefault().getTable("troubleshooting");
     var leftReference = table.getEntry("left_reference");
@@ -144,5 +148,5 @@ public class RobotContainer {
 
     // Run path following command, then stop at the end.
     return ramseteCommand.andThen(() -> m_drivetrainSubsystem.tankDriveVolts(0, 0));
-  }  
+  }
 }
