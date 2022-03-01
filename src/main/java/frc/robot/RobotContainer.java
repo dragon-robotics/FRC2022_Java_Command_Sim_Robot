@@ -15,8 +15,16 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.AutoLoader.AutoCommand;
+import frc.robot.commands.Auto.FiveBallBotLowGoalCommand;
 import frc.robot.commands.Auto.FourBallTopLeftLowGoalCommand;
+import frc.robot.commands.Auto.OneBallBotLeftLowGoalCommand;
+import frc.robot.commands.Auto.OneBallBotLowGoalCommand;
+import frc.robot.commands.Auto.OneBallTopLeftLowGoalCommand;
 import frc.robot.commands.Auto.OneBallTopLowGoalCommand;
+import frc.robot.commands.Auto.TwoBallBotLeftLowGoalCommand;
+import frc.robot.commands.Auto.TwoBallBotLowGoalCommand;
+import frc.robot.commands.Auto.TwoBallTopLeftLowGoalCommand;
+import frc.robot.commands.Auto.TwoBallTopLowGoalCommand;
 import frc.robot.commands.Teleop.ArcadeDriveCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -88,8 +96,32 @@ public class RobotContainer {
       case ONE_BALL_TOP_LOW_GOAL:
         return new OneBallTopLowGoalCommand(
             m_drivetrainSubsystem, command);
+      case ONE_BALL_TOP_LEFT_LOW_GOAL:
+        return new OneBallTopLeftLowGoalCommand(
+            m_drivetrainSubsystem, command);
+      case ONE_BALL_BOT_LEFT_LOW_GOAL:
+        return new OneBallBotLeftLowGoalCommand(
+            m_drivetrainSubsystem, command);
+      case ONE_BALL_BOT_LOW_GOAL:
+        return new OneBallBotLowGoalCommand(
+            m_drivetrainSubsystem, command);
+      case TWO_BALL_TOP_LOW_GOAL:
+        return new TwoBallTopLowGoalCommand(
+            m_drivetrainSubsystem, command);
+      case TWO_BALL_TOP_LEFT_LOW_GOAL:
+        return new TwoBallTopLeftLowGoalCommand(
+            m_drivetrainSubsystem, command);
+      case TWO_BALL_BOT_LEFT_LOW_GOAL:
+        return new TwoBallBotLeftLowGoalCommand(
+            m_drivetrainSubsystem, command);
+      case TWO_BALL_BOT_LOW_GOAL:
+        return new TwoBallBotLowGoalCommand(
+            m_drivetrainSubsystem, command);
       case FOUR_BALL_TOP_LEFT_LOW_GOAL:
         return new FourBallTopLeftLowGoalCommand(
+            m_drivetrainSubsystem, command);
+      case FIVE_BALL_BOT_LOW_GOAL:
+        return new FiveBallBotLowGoalCommand(
             m_drivetrainSubsystem, command);
       default:
         return null;

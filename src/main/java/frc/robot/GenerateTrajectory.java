@@ -119,8 +119,24 @@ public class GenerateTrajectory {
                 return new ArrayList<Trajectory>(Arrays.asList(exampleTrajectory));
             case ONE_BALL_TOP_LOW_GOAL:
                 return trajMap.get("OneBallTopLowGoal");
+            case ONE_BALL_TOP_LEFT_LOW_GOAL:
+                return trajMap.get("OneBallTopLeftLowGoal");
+            case ONE_BALL_BOT_LEFT_LOW_GOAL:
+                return trajMap.get("OneBallBotLeftLowGoal");
+            case ONE_BALL_BOT_LOW_GOAL:
+                return trajMap.get("OneBallBotLowGoal");
+            case TWO_BALL_TOP_LOW_GOAL:
+                return trajMap.get("TwoBallTopLowGoal");
+            case TWO_BALL_TOP_LEFT_LOW_GOAL:
+                return trajMap.get("TwoBallTopLeftLowGoal");
+            case TWO_BALL_BOT_LEFT_LOW_GOAL:
+                return trajMap.get("TwoBallBotLeftLowGoal");
+            case TWO_BALL_BOT_LOW_GOAL:
+                return trajMap.get("TwoBallBotLowGoal");
             case FOUR_BALL_TOP_LEFT_LOW_GOAL:
                 return trajMap.get("FourBallTopLeftLowGoal");
+            case FIVE_BALL_BOT_LOW_GOAL:
+                return trajMap.get("FiveBallBotLowGoal");
             default:
                 return null;
         }
