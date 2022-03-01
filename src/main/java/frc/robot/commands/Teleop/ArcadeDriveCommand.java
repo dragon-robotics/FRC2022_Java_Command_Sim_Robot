@@ -6,6 +6,7 @@ package frc.robot.commands.Teleop;
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.util.datalog.BooleanArrayLogEntry;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
@@ -14,15 +15,22 @@ public class ArcadeDriveCommand extends CommandBase {
   private final DrivetrainSubsystem m_drivetrain;
   private final Supplier<Double> m_speed;
   private final Supplier<Double> m_rotation;
+  private final Supplier<Double> m_throttle;
+  private final Supplier<Boolean> m_reverse;
 
   /** Creates a new ArcadeDrive. */
   public ArcadeDriveCommand(
       DrivetrainSubsystem drivetrain,
       Supplier<Double> speed,
-      Supplier<Double> rotation) {
+      Supplier<Double> rotation,
+      Supplier<Double> throttle,
+      Supplier<Boolean> reverse
+    ) {
     m_drivetrain = drivetrain;
     m_speed = speed;
     m_rotation = rotation;
+    m_throttle = throttle;
+    m_reverse = reverse;
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drivetrain);
@@ -36,7 +44,12 @@ public class ArcadeDriveCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_drivetrain.arcadeDrive(m_speed.get(), m_rotation.get());
+
+    double throttle = m_throttle.get() > 0.5 ? 0.5 : 1 - m_throttle.get();
+    double speed = m_reverse.get() ? -m_speed.get() * throttle : m_speed.get() * throttle;
+    double rotation = m_rotation.get();
+
+    m_drivetrain.arcadeDrive(speed, rotation);
   }
 
   // Called once the command ends or is interrupted.

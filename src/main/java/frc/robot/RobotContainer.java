@@ -96,8 +96,11 @@ public class RobotContainer {
     // Commands //
     return new ArcadeDriveCommand(
         m_drivetrainSubsystem,
-        () -> -m_driverController.getRawAxis(Constants.STICK_LEFT_Y),
-        () -> m_driverController.getRawAxis(Constants.STICK_RIGHT_X));
+        () -> -m_driverController.getRawAxis(Constants.STICK_LEFT_Y),   // speed
+        () -> m_driverController.getRawAxis(Constants.STICK_RIGHT_X),   // turn
+        () -> m_driverController.getRawAxis(Constants.TRIGGER_LEFT),    // throttle
+        () -> m_driverController.getRawButton(Constants.BUMPER_RIGHT)   // reverse
+    );
   }
 
   public Command getRamseteCommand() {
