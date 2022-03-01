@@ -40,10 +40,17 @@ public class GenerateTrajectory {
 
         // Get all JSON files from the deploy directory //
 
-        File[] trajJsonFiles = Filesystem.getDeployDirectory().listFiles(
+        File[] trajJsonFiles = 
+            new File(
+                Filesystem
+                .getDeployDirectory()
+                .getPath() + "\\output"
+            )
+            .listFiles(
                 (d, s) -> {
                     return s.toLowerCase().endsWith(".json");
-                });
+                }
+            );
 
         try {
             // For each trajectory JSON files, parse the commands from the filename
