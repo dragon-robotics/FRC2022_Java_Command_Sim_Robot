@@ -15,7 +15,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.AutoLoader.AutoCommand;
-import frc.robot.commands.Auto.FourBallHighGoalCommand;
+import frc.robot.commands.Auto.FourBallTopLeftLowGoalCommand;
+import frc.robot.commands.Auto.OneBallTopLowGoalCommand;
 import frc.robot.commands.Teleop.ArcadeDriveCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -79,14 +80,17 @@ public class RobotContainer {
     // An ExampleCommand will run in autonomous
     AutoCommand command = m_autoLoader.getSelected();
 
-    switch(command){
+    switch (command) {
       case NONE:
         return null;
       case EXAMPLE_TRAJECTORY:
         return getRamseteCommand();
-      case FOUR_BALL_HIGH_GOAL:
-        return new FourBallHighGoalCommand(
-          m_drivetrainSubsystem, command);
+      case ONE_BALL_TOP_LOW_GOAL:
+        return new OneBallTopLowGoalCommand(
+            m_drivetrainSubsystem, command);
+      case FOUR_BALL_TOP_LEFT_LOW_GOAL:
+        return new FourBallTopLeftLowGoalCommand(
+            m_drivetrainSubsystem, command);
       default:
         return null;
     }

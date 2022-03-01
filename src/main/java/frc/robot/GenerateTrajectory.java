@@ -5,9 +5,7 @@
 package frc.robot;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -26,28 +26,30 @@ import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.robot.AutoLoader.AutoCommand;
+import frc.robot.subsystems.DrivetrainSubsystem;
 
 /** Generates Trajectories depending on which auto mode is selected */
 public class GenerateTrajectory {
 
     public static Map<String, List<Trajectory>> trajMap = new HashMap<>();
 
-    public static void loadTrajectories(){
-        
+    public static void loadTrajectories() {
+
         // Get all JSON files from the deploy directory //
-        
+
         File[] trajJsonFiles = Filesystem.getDeployDirectory().listFiles(
-            (d, s) -> {
-                return s.toLowerCase().endsWith(".json");
-            }
-        );
-        
-        try{
+                (d, s) -> {
+                    return s.toLowerCase().endsWith(".json");
+                });
+
+        try {
             // For each trajectory JSON files, parse the commands from the filename
-            // and group the paths into { command => trajectory[] } pairs. 
-            for(File trajJson : trajJsonFiles){
-                
+            // and group the paths into { command => trajectory[] } pairs.
+            for (File trajJson : trajJsonFiles) {
+
                 String filename = trajJson.getName();
                 System.out.println(trajJson.getName()); // Print name for debug
 
@@ -60,15 +62,13 @@ public class GenerateTrajectory {
                 // Load trajectory //
 
                 // Check if command exist in hashmap //
-                if(trajMap.containsKey(command)){
+                if (trajMap.containsKey(command)) {
                     // If command exist, insert the trajectory into the existing array //
                     trajMap.get(command).add(traj);
-                }
-                else{
+                } else {
                     // If command doesn't exist, insert a new command + trajectory array //
                     List<Trajectory> trajList = new ArrayList<Trajectory>(
-                        Arrays.asList(traj)
-                    );
+                            Arrays.asList(traj));
                     trajMap.put(command, trajList);
                 }
             }
@@ -77,8 +77,8 @@ public class GenerateTrajectory {
         }
     }
 
-    public static List<Trajectory> getTrajectory(AutoCommand command){
-        switch(command){
+    public static List<Trajectory> getTrajectory(AutoCommand command) {
+        switch (command) {
             case NONE:
                 return null;
             case EXAMPLE_TRAJECTORY:
@@ -117,10 +117,33 @@ public class GenerateTrajectory {
                         config);
 
                 return new ArrayList<Trajectory>(Arrays.asList(exampleTrajectory));
-            case FOUR_BALL_HIGH_GOAL:
-                return trajMap.get("FourBallHighGoal");
+            case FOUR_BALL_TOP_LEFT_LOW_GOAL:
+                return trajMap.get("FourBallTopLeftLowGoal");
             default:
                 return null;
         }
+    }
+
+    public static Command getRamseteCommand(
+            Trajectory trajectory,
+            DrivetrainSubsystem drivetrain) {
+
+        return new RamseteCommand(
+                trajectory,
+                drivetrain::getPose,
+                new RamseteController(Constants.kRamseteB, Constants.kRamseteZeta),
+                new SimpleMotorFeedforward(
+                        Constants.ksVolts,
+                        Constants.kvVoltSecondsPerMeter,
+                        Constants.kaVoltSecondsSquaredPerMeter),
+                Constants.kDriveKinematics,
+                drivetrain::getWheelSpeeds,
+                new PIDController(Constants.kPDriveVel, 0, 0),
+                new PIDController(Constants.kPDriveVel, 0, 0),
+                // RamseteCommand passes volts to the callback
+                drivetrain::tankDriveVolts,
+                drivetrain)
+                        .beforeStarting(() -> drivetrain.resetOdometry(trajectory.getInitialPose()))
+                        .andThen(() -> drivetrain.tankDriveVolts(0, 0));
     }
 }
