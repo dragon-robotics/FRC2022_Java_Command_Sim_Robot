@@ -6,7 +6,6 @@ package frc.robot.commands.Teleop;
 
 import java.util.function.Supplier;
 
-import edu.wpi.first.util.datalog.BooleanArrayLogEntry;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
