@@ -38,14 +38,18 @@ public class GenerateTrajectory {
 
     public static void loadTrajectories() {
 
-        // Get all JSON files from the deploy directory //
+        // Get all Trajectory JSON files from the deploy/output directory //
 
-        File[] trajJsonFiles = 
+        // Create the output directory //
+        File trajOutputDir = 
             new File(
                 Filesystem
                 .getDeployDirectory()
                 .getPath() + "\\output"
-            )
+            );
+
+        File[] trajJsonFiles = 
+            trajOutputDir
             .listFiles(
                 (d, s) -> {
                     return s.toLowerCase().endsWith(".json");
@@ -61,7 +65,7 @@ public class GenerateTrajectory {
                 System.out.println(trajJson.getName()); // Print name for debug
 
                 // Get path //
-                Path trajPath = Filesystem.getDeployDirectory().toPath().resolve(filename);
+                Path trajPath = trajOutputDir.toPath().resolve(filename);
                 Trajectory traj = TrajectoryUtil.fromPathweaverJson(trajPath);
 
                 // Parse command //
